@@ -108,16 +108,15 @@ int main() {
                     }
                 }
 
-                bool sending;
+                // send packet to router and get answer where to send next if needed
                 if (index != -1)
                 {
-                    sending = true;
                     log("\n");
-                    while (sending)
+                    while (true)
                     {
                         index = routerList[index]->receivePacket(packet);
                         if (index == -1 || index == -2)
-                            sending = false;
+                            break;
                     }
                     flushLog();
                 }
@@ -133,8 +132,7 @@ int main() {
 
 void addDevices(int nRouters, std::vector<Router*> &routers)
 {
-    int i;
-    for(i = 0; i < nRouters; ++i)
+    for(int i = 0; i < nRouters; ++i)
     {
         Router *router = new Router();
         router->generateNextName();
