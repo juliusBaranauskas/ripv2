@@ -1,0 +1,12 @@
+5
+1 1 2 192.168.1.2 192.168.2.2
+3 0 2 3 1 192.168.3.2
+2 1 4 0
+2 1 4 0
+2 2 3 1 192.168.4.2
+
+# First line number of Routers N
+
+# N lines follow, descibing each device's neighbours
+
+# e.g. line i: "3 4 5 10 1 192.168.0.1" means that i-th device is connected to 3 routers: 4th, 5th and 10th, and to 1 end device with mentioned IP

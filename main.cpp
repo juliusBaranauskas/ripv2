@@ -30,7 +30,8 @@ int main() {
     short timer = 0;
     std::string input;
     std::vector<Router*> routerList;
-    std::ifstream file("graph.in");
+    std::string graphFileName = "pakeitimas.in";
+    std::ifstream file(graphFileName);
 
     // reading from graph.in and creating objects to represent that data
     file >> nRouters;
@@ -63,7 +64,7 @@ int main() {
             // die or not to die
             for (auto it: routerList)
             {
-                if (rand()%1000 == 1)
+                if (it->isWorking && rand()%1000 == 1)
                 {
                     it->isWorking = false;
                     log(it->m_name + " died\n");
@@ -76,7 +77,7 @@ int main() {
             rtExchanges++;
         }
 
-        if (rtExchanges == 3)
+        if (rtExchanges > 3)
         {
             std::cout << "Enter cmd \'ping source_ip destination_ip packet_message\'\n";
             std::getline(std::cin, input);
@@ -101,10 +102,13 @@ int main() {
                 // find first recipient and begin sending
                 for(auto it: routerList)
                 {
-                    if (areEqual(it->directConnection, srcIp))
+                    for(auto conn: it->directConnections)
                     {
-                        index = it->m_id;
-                        break;
+                        if (areEqual(conn, srcIp))
+                        {
+                            index = it->m_id;
+                            break;
+                        }
                     }
                 }
 
@@ -120,6 +124,20 @@ int main() {
                     }
                     flushLog();
                 }
+            }
+            else if (input.substr(0, 4) == "kill")
+            {
+                int deviceId;
+	            std::istringstream(input.substr(5)) >> deviceId;
+                if (routerList.size() > deviceId && deviceId > -1)
+                {
+                    std::cout << "KILLING device: "<< deviceId << "\n";
+                    routerList[deviceId]->isWorking = false;
+                }
+            }
+            else if (input.substr(0, 2) == "ff")
+            {
+                rtExchanges = 0;
             }
         }
         
@@ -163,15 +181,10 @@ void addNeighbours(int nRouters, std::vector<Router*> &routers, std::ifstream &f
             file >> ip_addr;
             log("adding direct conn: " + ip_addr + " to " + routers[i]->m_name + "\n");
 
-            struct ROUTING_ENTRY *entry = new struct ROUTING_ENTRY();
-            entry->nextDeviceId = routers[i]->m_id;
-            entry->currentDeviceId = routers[i]->m_id;
-            entry->hop_count = 0;
-            entry->ip_address = stringToIP(ip_addr);
+            struct ROUTING_ENTRY *entry = new struct ROUTING_ENTRY(stringToIP(ip_addr), 0, routers[i]->m_id, routers[i]->m_id);
+            
             routers[i]->routingTable.insert(std::pair<struct IP_ADDRESS*, struct ROUTING_ENTRY>(stringToIP(ip_addr), *entry));
-
-            routers[i]->directConnection = entry->ip_address;
-            log("added to routing table " + std::to_string(routers[i]->routingTable.size()) + "\n");
+            routers[i]->directConnections.push_back(entry->ip_address);
         }
     }
     log("finished adding neighbours\n");
@@ -190,13 +203,18 @@ void updateRoutingInfo(std::vector<Router*> &routerList)
     flushLog();
     for(auto it: routerList)
     {
-        if(!it->isWorking)
-            continue;
-
         for(auto neighbour: it->m_neighbours)
+        {
             if (neighbour->isWorking)
-                neighbour->acceptRoutingTable(it->routingTable);
+            {
+                if(it->isWorking)
+                    neighbour->acceptRoutingTable(it->routingTable);
+                else
+                    neighbour->acceptRoutingTable(it->routingTable, false);
+            }
 
+        }
+            
         log(it->m_name + "\n");
 
         for(auto tableEntry: it->routingTable)

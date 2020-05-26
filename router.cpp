@@ -9,6 +9,12 @@ Router::Router()
 // returns next hop router id, -1 when it is not found, -2 when packet has reached it's destination
 int Router::receivePacket(Packet packet)
 {
+    if (!isWorking)
+    {
+        log(m_name + " cannot be reached...\n");
+        return -1;
+    }
+
     log(m_name + " received packet with: " + packet.content + "\n");
     flushLog();
 
@@ -41,11 +47,25 @@ void Router::generateNextName()
     m_lastDeviceId++;
 }
 
-void Router::acceptRoutingTable(std::map<struct IP_ADDRESS*, struct ROUTING_ENTRY> routingTableOffer)
+void Router::acceptRoutingTable(std::map<struct IP_ADDRESS*, struct ROUTING_ENTRY> routingTableOffer, bool works /* = true*/)
 {
     log(m_name + " routing table size: " + std::to_string(routingTable.size()) + "\n");
+
+    if (routingTableOffer.empty())
+        return;
+
+    if (!works)
+    {
+        for (auto it: routingTable)
+            if (it.second.nextDeviceId == routingTableOffer[0].currentDeviceId)
+                routingTable.erase(it.first);
+
+        return;
+    }
+
     ROUTING_ENTRY entry;
-    for(auto it: routingTableOffer)
+
+    for (auto it: routingTableOffer)
     {
         entry = findInRoutingTable(it.first);
         if (!entry.empty)

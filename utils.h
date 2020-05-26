@@ -54,6 +54,18 @@ public:
 };
 
 struct ROUTING_ENTRY{
+    ROUTING_ENTRY()
+    {
+    }
+
+    ROUTING_ENTRY(struct IP_ADDRESS* ip, short hopCount, short nextId, short currentId) :
+    ip_address(ip),
+    hop_count(hopCount),
+    nextDeviceId(nextId),
+    currentDeviceId(currentId)
+    {
+    }
+
     struct IP_ADDRESS* ip_address;
     short hop_count;
     short nextDeviceId;

@@ -11,7 +11,7 @@ class Router
 public:
     std::string m_name;
     std::vector<Router*> m_neighbours;
-    struct IP_ADDRESS* directConnection;
+    std::vector<struct IP_ADDRESS*> directConnections;
     short m_id;
     bool isWorking = true;
     std::vector<struct IP_ADDRESS*> interfaces; // ip addresses of router interfaces
@@ -20,6 +20,6 @@ public:
     Router();
     int receivePacket(Packet packet);
     void generateNextName();
-    void acceptRoutingTable(std::map<struct IP_ADDRESS*, struct ROUTING_ENTRY> routingTableOffer);
+    void acceptRoutingTable(std::map<struct IP_ADDRESS*, struct ROUTING_ENTRY> routingTableOffer, bool works = true);
     struct ROUTING_ENTRY findInRoutingTable(struct IP_ADDRESS* entry);
 };
