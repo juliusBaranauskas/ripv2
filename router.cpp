@@ -3,7 +3,6 @@
 
 Router::Router()
 {
-
 }
 
 // returns next hop router id, -1 when it is not found, -2 when packet has reached it's destination
@@ -70,7 +69,8 @@ void Router::acceptRoutingTable(std::map<struct IP_ADDRESS*, struct ROUTING_ENTR
         entry = findInRoutingTable(it.first);
         if (!entry.empty)
         {
-            if (entry.hop_count > it.second.hop_count+1 && it.second.hop_count+1 < 16){
+            if (entry.hop_count > it.second.hop_count+1 && it.second.hop_count+1 < 16)
+            {
                 routingTable.erase(it.first);
                 
                 auto newEntry = copyEntry(it);
@@ -86,6 +86,7 @@ void Router::acceptRoutingTable(std::map<struct IP_ADDRESS*, struct ROUTING_ENTR
         {
             if (it.second.hop_count > 14)
                 return;
+
             auto newEntry = copyEntry(it);
             newEntry.second.hop_count++;
             newEntry.second.nextDeviceId = it.second.currentDeviceId;
@@ -98,7 +99,6 @@ void Router::acceptRoutingTable(std::map<struct IP_ADDRESS*, struct ROUTING_ENTR
 
 struct ROUTING_ENTRY Router::findInRoutingTable(struct IP_ADDRESS* entry)
 {
-    std::cout << routingTable.size()<<std::endl;
     for(auto it: routingTable)
         if (areEqual(it.first, *entry))
             return it.second;

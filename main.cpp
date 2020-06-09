@@ -16,7 +16,7 @@ void addDevices(int nRouters, std::vector<Router*> &devices);
 
 void addNeighbours(int nRouters, std::vector<Router*> &routers, std::ifstream &file);
 
-void printDevices(std::vector<Router*> routers);
+void printDevices(std::vector<Router*> &routers);
 
 void updateRoutingInfo(std::vector<Router*> &routerList);
 
@@ -190,7 +190,7 @@ void addNeighbours(int nRouters, std::vector<Router*> &routers, std::ifstream &f
     log("finished adding neighbours\n");
 }
 
-void printDevices(std::vector<Router*> routers)
+void printDevices(std::vector<Router*> &routers)
 {
     for(auto it: routers)
         std::cout << it->m_name << std::endl;

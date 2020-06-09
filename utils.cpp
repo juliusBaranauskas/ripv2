@@ -74,7 +74,6 @@ void flushLog()
 
 bool areEqual(struct IP_ADDRESS* const a, struct IP_ADDRESS b)
 {
-    std::cout << "are equal?\n";
     return b.firstOctet == a->firstOctet
             && b.secondOctet == a->secondOctet
             && b.thirdOctet == a->thirdOctet
@@ -83,7 +82,6 @@ bool areEqual(struct IP_ADDRESS* const a, struct IP_ADDRESS b)
 
 bool areEqual(struct IP_ADDRESS* a, struct IP_ADDRESS* b)
 {
-    std::cout << "are equal? 2\n";
     return b->firstOctet == a->firstOctet
             && b->secondOctet == a->secondOctet
             && b->thirdOctet == a->thirdOctet
