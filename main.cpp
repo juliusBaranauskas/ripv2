@@ -11,6 +11,7 @@
 #include "packet.h"
 
 #define time_interval 1000
+#define update_interval 30
 
 void addDevices(int nRouters, std::vector<Router*> &devices);
 
@@ -38,10 +39,10 @@ int main() {
     addDevices(nRouters, routerList);
     addNeighbours(nRouters, routerList, file);
 
-    for(auto it: routerList)
+    for (auto it: routerList)
     {
         log(it->m_name + "\n");
-        for(auto tableEntry: it->routingTable)
+        for (auto tableEntry: it->routingTable)
         {
             log("\t" + tableEntry.first->toString() + " "
                 + std::to_string((int)tableEntry.second.nextDeviceId) + " "
@@ -54,12 +55,12 @@ int main() {
     /*
     Main loop for:
         - updating router state
-        - routing tables
+        - updating routing tables
         - requesting packets to be sent (console input)
     */
-    while(true)
+    while (true)
     {
-        if (timer == 30)
+        if (timer == update_interval)
         {
             // die or not to die
             for (auto it: routerList)
@@ -77,6 +78,7 @@ int main() {
             rtExchanges++;
         }
 
+        // asking for user input only after 3 Routing Table exchanges (3*update_interval) so routers have some reasonable entries
         if (rtExchanges > 3)
         {
             std::cout << "Enter cmd \'ping source_ip destination_ip packet_message\'\n";
@@ -100,9 +102,9 @@ int main() {
                 auto srcIp =  stringToIP(firstIp);
 
                 // find first recipient and begin sending
-                for(auto it: routerList)
+                for (auto it: routerList)
                 {
-                    for(auto conn: it->directConnections)
+                    for (auto conn: it->directConnections)
                     {
                         if (areEqual(conn, srcIp))
                         {
@@ -150,7 +152,7 @@ int main() {
 
 void addDevices(int nRouters, std::vector<Router*> &routers)
 {
-    for(int i = 0; i < nRouters; ++i)
+    for (int i = 0; i < nRouters; ++i)
     {
         Router *router = new Router();
         router->generateNextName();
@@ -166,17 +168,17 @@ void addNeighbours(int nRouters, std::vector<Router*> &routers, std::ifstream &f
     std::string ip_addr;
     int j;
 
-    for(int i = 0; i < nRouters; ++i)
+    for (int i = 0; i < nRouters; ++i)
     {
         file >> nConn;
-        for(j = 0; j < nConn; ++j)
+        for (j = 0; j < nConn; ++j)
         {
             file >> routerIndex;
             routers[i]->m_neighbours.push_back(routers[routerIndex]);
         }
 
         file >> nConn;
-        for(j = 0; j < nConn; ++j)
+        for (j = 0; j < nConn; ++j)
         {
             file >> ip_addr;
             log("adding direct conn: " + ip_addr + " to " + routers[i]->m_name + "\n");
@@ -192,7 +194,7 @@ void addNeighbours(int nRouters, std::vector<Router*> &routers, std::ifstream &f
 
 void printDevices(std::vector<Router*> &routers)
 {
-    for(auto it: routers)
+    for (auto it: routers)
         std::cout << it->m_name << std::endl;
 
     std::cout << std::endl;
@@ -201,13 +203,13 @@ void printDevices(std::vector<Router*> &routers)
 void updateRoutingInfo(std::vector<Router*> &routerList)
 {
     flushLog();
-    for(auto it: routerList)
+    for (auto it: routerList)
     {
-        for(auto neighbour: it->m_neighbours)
+        for (auto neighbour: it->m_neighbours)
         {
             if (neighbour->isWorking)
             {
-                if(it->isWorking)
+                if (it->isWorking)
                     neighbour->acceptRoutingTable(it->routingTable);
                 else
                     neighbour->acceptRoutingTable(it->routingTable, false);
@@ -217,7 +219,7 @@ void updateRoutingInfo(std::vector<Router*> &routerList)
             
         log(it->m_name + "\n");
 
-        for(auto tableEntry: it->routingTable)
+        for (auto tableEntry: it->routingTable)
             log("\t" + tableEntry.first->toString() + " "
                 + std::to_string((int)tableEntry.second.nextDeviceId) + " "
                 + std::to_string((int)tableEntry.second.hop_count) + "\n");
